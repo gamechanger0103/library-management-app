@@ -1,0 +1,26 @@
+{
+  "name": "Arrow Escape — Neon Puzzle",
+  "short_name": "Arrow Escape",
+  "description": "A neon arrow puzzle game. 520 hand-tuned levels, daily puzzles, power-ups and offline play.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#05070f",
+  "theme_color": "#070b18",
+  "categories": ["games", "puzzle"],
+  "icons": [
+    {
+      "src": "assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

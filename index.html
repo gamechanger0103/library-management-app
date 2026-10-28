@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+<meta name="theme-color" content="#070b18" />
+<meta name="description" content="Arrow Escape — a neon arrow puzzle game. 520 levels, power-ups, daily puzzles and offline play." />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<title>Arrow Escape — Neon Puzzle</title>
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="assets/icon.svg" />
+<link rel="stylesheet" href="styles/app.css" />
+<link rel="stylesheet" href="styles/game.css" />
+</head>
+<body>
+
+<!-- ambient background -->
+<div class="ambient" aria-hidden="true">
+  <span class="orb orb-a"></span>
+  <span class="orb orb-b"></span>
+  <span class="orb orb-c"></span>
+  <span class="grain"></span>
+</div>
+
+<canvas id="fx-canvas" aria-hidden="true"></canvas>
+
+<main id="app">
+
+  <!-- ================= TITLE ================= -->
+  <section class="screen screen-title is-active" id="screen-title" aria-label="Start screen">
+    <div class="title-decos" aria-hidden="true">
+      <span class="deco-arrow" data-dir="up"   style="--i:0">➤</span>
+      <span class="deco-arrow" data-dir="right" style="--i:1">➤</span>
+      <span class="deco-arrow" data-dir="down"  style="--i:2">➤</span>
+      <span class="deco-arrow" data-dir="left"  style="--i:3">➤</span>
+      <span class="deco-arrow" data-dir="up"    style="--i:4">➤</span>
+    </div>
+
+    <div class="title-inner">
+      <header class="brand">
+        <div class="logo">
+          <span class="logo-row logo-arrow">ARROW</span>
+          <span class="logo-row logo-escape">ESCAPE</span>
+        </div>
+        <p class="tagline">Every arrow must fly free.</p>
+        <div class="pill-row">
+          <span class="pill">520 levels</span>
+          <span class="pill">neon puzzle</span>
+          <span class="pill">offline</span>
+        </div>
+      </header>
+
+      <div class="glass panel-actions">
+        <button class="btn btn-primary btn-xl btn-block" id="btn-continue">
+          <span class="btn-ico"><i data-icon="play"></i></span>
+          <span class="btn-body">
+            <span class="btn-title" id="continue-label">Continue</span>
+            <span class="btn-sub" id="continue-sub">Level 1 · Easy</span>
+          </span>
+        </button>
+
+        <button class="btn btn-ghost btn-block" id="btn-daily">
+          <span class="btn-ico"><i data-icon="target"></i></span>
+          <span class="btn-body">
+            <span class="btn-title">Daily Puzzle</span>
+            <span class="btn-sub" id="daily-sub">Brand new board every day</span>
+          </span>
+          <span class="dot-alert" id="daily-dot" hidden></span>
+        </button>
+
+        <div class="btn-grid">
+          <button class="btn btn-ghost" id="btn-levels"><span class="btn-ico"><i data-icon="map"></i></span> Levels</button>
+          <button class="btn btn-ghost" id="btn-stats"><span class="btn-ico"><i data-icon="trophy"></i></span> Stats</button>
+          <button class="btn btn-ghost" id="btn-settings"><span class="btn-ico"><i data-icon="gear"></i></span> Settings</button>
+          <button class="btn btn-ghost" id="btn-howto"><span class="btn-ico"><i data-icon="help"></i></span> How to play</button>
+          <button class="btn btn-ghost is-wide" id="btn-rewards">
+            <span class="btn-ico"><i data-icon="gift"></i></span>
+            <span class="btn-body"><span class="btn-title">Daily reward</span><span class="btn-sub" id="rewards-sub">Claim your coins</span></span>
+            <span class="dot-alert" id="rewards-dot"></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="meta-strip" id="meta-strip">
+        <div class="meta-chip"><span class="meta-label">Best</span><span class="meta-value" id="meta-best">0</span></div>
+        <div class="meta-chip"><span class="meta-label">Coins</span><span class="meta-value" id="meta-coins">0</span></div>
+        <div class="meta-chip"><span class="meta-label">Streak</span><span class="meta-value" id="meta-streak">0</span></div>
+        <div class="meta-chip"><span class="meta-label">Stars</span><span class="meta-value" id="meta-stars">0</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= LEVEL MAP ================= -->
+  <section class="screen screen-levels" id="screen-levels" aria-label="Level select">
+    <header class="page-head">
+      <button class="icon-btn" id="btn-levels-back" aria-label="Back"><i data-icon="left"></i></button>
+      <div class="page-title">
+        <h2>Level Map</h2>
+        <p id="levels-summary">0 / 520 cleared</p>
+      </div>
+      <button class="icon-btn" id="btn-levels-settings" aria-label="Settings"><i data-icon="gear"></i></button>
+    </header>
+
+    <div class="progress-wrap">
+      <div class="progress-track"><div class="progress-fill" id="levels-progress"></div></div>
+    </div>
+
+    <div class="filter-row" id="filter-row">
+      <button class="chip is-active" data-filter="all">All</button>
+      <button class="chip" data-filter="easy">Easy</button>
+      <button class="chip" data-filter="medium">Medium</button>
+      <button class="chip" data-filter="hard">Hard</button>
+      <button class="chip" data-filter="expert">Expert</button>
+    </div>
+
+    <div class="level-scroll" id="level-scroll">
+      <div id="level-list"></div>
+    </div>
+  </section>
+
+  <!-- ================= GAME ================= -->
+  <section class="screen screen-game" id="screen-game" aria-label="Game">
+    <header class="hud">
+      <button class="icon-btn" id="btn-pause" aria-label="Pause game"><i data-icon="pause"></i></button>
+
+      <div class="hud-level">
+        <span class="hud-level-label" id="hud-level-label">LEVEL</span>
+        <span class="hud-level-num" id="hud-level">1</span>
+      </div>
+
+      <div class="hud-center">
+        <div class="hud-score" id="hud-score">0</div>
+        <div class="hud-sub"><span id="hud-moves">0</span> moves</div>
+      </div>
+
+      <div class="hud-right">
+        <div class="hud-timer" id="hud-time">0:00</div>
+        <div class="hearts" id="hud-lives" aria-label="Lives"></div>
+      </div>
+    </header>
+
+    <div class="combo-layer" id="combo-layer" aria-hidden="true"></div>
+    <div class="board-zone">
+      <div class="board-wrap" id="board-wrap">
+        <div class="board-glow" aria-hidden="true"></div>
+        <div class="board" id="board">
+          <div class="grid" id="grid" aria-hidden="true"></div>
+          <div class="arrow-layer" id="arrow-layer"></div>
+          <div class="cursor" id="cursor" hidden aria-hidden="true"></div>
+        </div>
+      </div>
+      <div class="caption-row">
+        <div class="mini-progress"><i id="board-progress"></i></div>
+        <div class="board-caption" id="board-caption">Tap an arrow with a clear path</div>
+      </div>
+    </div>
+
+    <footer class="powerbar">
+      <button class="power" data-power="hint" aria-label="Hint">
+        <span class="power-ico"><i data-icon="bulb"></i></span>
+        <span class="power-cost" id="cost-hint">10</span>
+        <span class="power-key">H</span>
+      </button>
+      <button class="power" data-power="undo" aria-label="Undo">
+        <span class="power-ico"><i data-icon="undo"></i></span>
+        <span class="power-cost" id="cost-undo">15</span>
+        <span class="power-key">Z</span>
+      </button>
+      <button class="power" data-power="shuffle" aria-label="Shuffle board">
+        <span class="power-ico"><i data-icon="shuffle"></i></span>
+        <span class="power-cost" id="cost-shuffle">25</span>
+        <span class="power-key">R</span>
+      </button>
+      <button class="power" data-power="life" aria-label="Extra life">
+        <span class="power-ico"><i data-icon="heart"></i></span>
+        <span class="power-cost" id="cost-life">30</span>
+        <span class="power-key">L</span>
+      </button>
+      <div class="coin-balance" id="coin-balance"><span class="coin-ico"><i data-icon="coin"></i></span><span id="coin-count">0</span></div>
+    </footer>
+  </section>
+
+</main>
+
+<div id="modal-root" class="modal-root" hidden></div>
+<div id="toast-root" class="toast-root" aria-live="polite"></div>
+
+<noscript>
+  <div class="noscript">Arrow Escape needs JavaScript enabled to run.</div>
+</noscript>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
